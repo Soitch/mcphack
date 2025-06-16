@@ -1,18 +1,21 @@
-import asyncio
+# main.py
+
 import multiprocessing
-import uvicorn
+import asyncio
 from master.mcp_server import app
 from agents.agent_worker import run_agent
 from bot.telegram_bot import TelegramBot
 from config import Config
+import uvicorn
 
 def run_mcp_server():
-    """Запуск MCP-сервера"""
+    """Запуск MCP сервера с помощью uvicorn"""
     uvicorn.run(
-        app, 
-        host=Config.MCP_HOST, 
+        app,
+        host=Config.MCP_HOST,
         port=Config.MCP_PORT,
-        log_level="info"
+        log_level="info",
+        reload=Config.DEBUG
     )
 
 async def run_agents(num_agents: int = 3):
@@ -24,22 +27,22 @@ async def run_agents(num_agents: int = 3):
     await asyncio.gather(*tasks)
 
 async def run_telegram_bot():
-    """Запуск Telegram-бота"""
+    """Запуск Telegram бота"""
     bot = TelegramBot()
     await bot.run()
 
 async def main():
-    """Основная функция запуска системы"""
-    # Запуск MCP-сервера в отдельном процессе
+    """Основная функция запуска"""
+    # Запуск MCP сервера в отдельном процессе
     server_process = multiprocessing.Process(target=run_mcp_server)
     server_process.start()
     
-    # Запуск агентов и бота в асинхронном режиме
     try:
-        agents_task = asyncio.create_task(run_agents(Config.AGENT_POOL_SIZE))
-        bot_task = asyncio.create_task(run_telegram_bot())
-        
-        await asyncio.gather(agents_task, bot_task)
+        # Запуск агентов и бота
+        await asyncio.gather(
+            run_agents(Config.AGENT_POOL_SIZE),
+            run_telegram_bot()
+        )
     except KeyboardInterrupt:
         print("Завершение работы...")
     finally:

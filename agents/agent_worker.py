@@ -1,30 +1,64 @@
+#agent_worker.py
+
 import asyncio
 import uuid
-from fastmcp import MCPClient
+import logging
+from fastmcp import Client
 from config import Config
+
+# Настройка логирования
+logger = logging.getLogger("agent_worker")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class AgentWorker:
     def __init__(self):
         self.agent_id = f"agent-{uuid.uuid4().hex[:8]}"
-        self.client = MCPClient(f"http://{Config.MCP_HOST}:{Config.MCP_PORT}")
+        self.client = Client(f"http://{Config.MCP_HOST}:{Config.MCP_PORT}")
+        logger.info(f"Агент инициализирован: {self.agent_id}")
 
-    async def start(self):
-        """Основной цикл работы агента"""
+    async def register(self):
+        """Регистрация агента на MCP-сервере"""
         try:
             await self.client.connect()
-            await self.client.models.vacancy_manager.register_agent(self.agent_id)
-            print(f"Агент {self.agent_id} запущен")
+            response = await self.client.call(
+                "register_agent",
+                agent_id=self.agent_id
+            )
             
-            while True:
-                await asyncio.sleep(10)  # Проверка задач каждые 10 секунд
-                # В реальной системе здесь будет получение задач из очереди
-                
+            if response.get("status") == "success":
+                logger.info(f"Агент зарегистрирован: {self.agent_id}")
+                return True
+            else:
+                logger.error(f"Ошибка регистрации: {response}")
+                return False
         except Exception as e:
-            print(f"Агент {self.agent_id} завершил работу с ошибкой: {e}")
+            logger.error(f"Ошибка регистрации: {str(e)}")
+            return False
+
+    async def run(self):
+        """Основной цикл работы агента"""
+        if not await self.register():
+            logger.error("Не удалось зарегистрировать агента. Завершение работы.")
+            return
+        
+        logger.info(f"Агент запущен: {self.agent_id}")
+        
+        try:
+            # В реальной системе здесь будет обработка задач
+            while True:
+                await asyncio.sleep(10)
+                logger.debug(f"Агент {self.agent_id} активен")
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            logger.error(f"Ошибка в рабочем цикле: {str(e)}")
+        finally:
+            logger.info(f"Агент остановлен: {self.agent_id}")
 
 async def run_agent():
     worker = AgentWorker()
-    await worker.start()
-
-if __name__ == "__main__":
-    asyncio.run(run_agent())
+    await worker.run()
