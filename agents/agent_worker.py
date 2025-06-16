@@ -48,8 +48,8 @@ class AgentWorker:
         logger.info(f"Агент запущен: {self.agent_id}")
         
         try:
-            # В реальной системе здесь будет обработка задач
             while True:
+                # В реальной системе здесь будет получение и обработка задач
                 await asyncio.sleep(10)
                 logger.debug(f"Агент {self.agent_id} активен")
         except asyncio.CancelledError:

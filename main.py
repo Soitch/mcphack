@@ -1,5 +1,5 @@
 # main.py
-
+'''
 import multiprocessing
 import asyncio
 from master.mcp_server import app
@@ -7,6 +7,7 @@ from agents.agent_worker import run_agent
 from bot.telegram_bot import TelegramBot
 from config import Config
 import uvicorn
+
 
 def run_mcp_server():
     """Запуск MCP сервера с помощью uvicorn"""
@@ -47,6 +48,17 @@ async def main():
         print("Завершение работы...")
     finally:
         server_process.terminate()
+
+if __name__ == "__main__":
+    asyncio.run(main())'''
+
+import asyncio
+from bot.telegram_bot import TelegramBot
+
+async def main():
+    """Основная функция запуска"""
+    bot = TelegramBot()
+    await bot.run()
 
 if __name__ == "__main__":
     asyncio.run(main())
