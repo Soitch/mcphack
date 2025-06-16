@@ -79,7 +79,7 @@ print("-" * 20)
 
 # Запрос 2: Поиск вакансий бухгалтера и расчет средней зарплаты (требует двух шагов или более сложной логики агента)
 # Шаг 1: Найти вакансии бухгалтера и сохранить их в файл
-inputs2_step1 = {"messages": [("user", "Найди вакансии бухгалтера и сохрани их в файл accountants.csv")]}
+inputs2_step1 = {"messages": [("user", "Найди вакансии Директора по персоналу с функцией обучения и сохрани их в файл recruter.csv")]}
 messages2_step1 = agent.invoke(inputs2_step1)["messages"]
 print("Ответ на запрос 2 (шаг 1 - поиск и сохранение):")
 print(messages2_step1[-1].content)
@@ -87,7 +87,7 @@ print(messages2_step1[-1].content)
 print("-" * 20)
 
 # Шаг 2: Прочитать файл и узнать среднюю зарплату
-inputs2_step2 = {"messages": [("user", "Какая средняя максимальная зарплата по вакансиям в файле accountants.csv?")]}
+inputs2_step2 = {"messages": [("user", "Какая средняя максимальная зарплата по вакансиям в файле recruter.csv?")]}
 messages2_step2 = agent.invoke(inputs2_step2)["messages"]
 print("Ответ на запрос 2 (шаг 2 - чтение и расчет):")
 print(messages2_step2[-1].content)
